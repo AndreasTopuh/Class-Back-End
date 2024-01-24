@@ -1,6 +1,6 @@
 const members = [
     {
-        id: 4,
+        id: 1,
         nim: '105022110077',
         nama: 'Andreas Topuh',
         nomor_telp: '082233445566'
@@ -18,7 +18,7 @@ const members = [
       nomor_telp: '08979578331'
     },
     {
-      id: 1,
+      id: 4,
       nim: '105022020003',
       nama: 'Ezra Pelealu',
       nomor_telp: '085395102059'
