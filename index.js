@@ -21,12 +21,12 @@ const server = http.createServer((req, res) => {
         res.write("<h1>This is the home page</h1>");
         res.end();
     } else if (path === '/about') {
-        res.statusCode = 210;
+        res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.write(JSON.stringify(about));
         res.end();
     } else if (path === '/users') {
-        res.statusCode = 220;
+        res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.write(JSON.stringify(users));
         res.end();
@@ -41,3 +41,4 @@ const server = http.createServer((req, res) => {
 server.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/ program by Andreas Topuh `);
 });
+
