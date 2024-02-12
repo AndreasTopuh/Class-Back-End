@@ -1,46 +1,44 @@
-const http = require('http');
+const express = require('express');
+const morgan = require('morgan');
 const port = 3000;
 
-const member = require('./member.js');
-const users = require('./users.js');
+const member = require('./member.js'); 
+const users = require('./users.js'); 
+const app = express();
 
-const about = {
-    status: "Success",
-    message: "Response Success",
-    description: "Tugas #2",
-    date: new Date(),
-    data: member
-};
+// Middleware
+app.use(morgan('dev')); 
 
-const server = http.createServer((req, res) => {
-    const path = req.url;
-
-    try {
-        if (path === '/') {
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'text/plain');
-            res.write("This is the home page");
-            res.end();
-        } else if (path === '/about') {
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
-            res.write(JSON.stringify(about));
-            res.end();
-        } else if (path === '/users') {
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
-            res.write(JSON.stringify(users));
-            res.end();
-        }
-    } catch (error) {
-        // Handle the error by sending a 404 response
-        res.statusCode = 404;
-        res.setHeader('Content-Type', 'text/plain');
-        res.write('404 Not Found bro hehehe salam dari Andreas');
-        res.end();
-    }
+app.use((req, res, next) => {
+    // Add your middleware logic here
+    // For example, you can log the request method and URL
+    console.log(`[${req.method}] ${req.url}`);
+    next();
 });
 
-server.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}/ program by Andreas Topuh `);
+app.get('/', (req, res) => {
+    res.send('<h1>This is the home page</h1>');
+});
+
+app.get('/about', (req, res) => {
+    const about = {
+        status: "Success",
+        message: "Response Success",
+        description: "Exercise #3 menggunakan EXPRESS.JS dan MORGAN",
+        date: new Date(),
+        data: member
+    };
+    res.json(about);
+});
+
+app.get('/users', (req, res) => {
+    res.json(users);
+});
+
+app.use((req, res, next) => {
+    res.status(404).send('Not Found');
+});
+
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}/`);
 });
