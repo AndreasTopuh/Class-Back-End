@@ -1,93 +1,52 @@
-////////////////KONDISI DISIMPAN DALAM TRY & CATCH//////////////
+import express from "express";
+import morgan from "morgan";
+import user from './users.js';
 
-const http = require('http');
-const port = 3000;
 
-const member = require('./member.js');
-const users = require('./users.js');
+const app = express();
 
-const about = {
-  status: "Success",
-  message: "Response Success",
-  description: "Exercise #2",
-  date: new Date(),
-  data: member
-};
+// Middleware
+app.use(morgan("dev"));
 
-const server = http.createServer((req, res) => {
-    const path = req.url;
 
-    if (path === '/') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/plain');
-        res.write("<h1>This is the home page</h1>");
-        res.end();
-    } else if (path === '/about') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.write(JSON.stringify(about));
-        res.end();
-    } else if (path === '/users') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.write(JSON.stringify(users));
-        res.end();
-    } else {
-        res.statusCode = 404;
-        res.setHeader('Content-Type', 'text/plain');
-        res.write('404 Not Found bro hehehe salam dari Andreas');
-        res.end();
+app.get("/users", (_req, res) => {
+    res.json(user);
+});
+
+
+app.get("/users/:name", (req, res) => {
+    const { name } = req.params;
+    const lowercaseName = name.toLowerCase();
+    const user = users.find((user) => user.name.toLowerCase() === lowercaseName);
+
+    if (!user) {
+        return res.status(404).json({
+            status: "error",
+            message: "Data user tidak ditemukan",
+        });
     }
+
+    res.json(user);
 });
 
-server.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}/ program by Andreas Topuh `);
+// Penanganan Routing 404
+app.use((_req, res) => {
+    res.status(404).json({
+        status: "error",
+        message: "Resource tidak ditemukan",
+    });
 });
 
+// Penanganan Error
+app.use((err, _req, res, _next) => {
+    console.error(err.stack);
+    res.status(500).json({
+        status: "error",
+        message: "Terjadi kesalahan pada server",
+    });
+});
 
-//////////////USING IF BIASA////////////////////////////
-
-// const http = require('http');
-// const port = 3000;
-
-// const member = require('./member.js');
-// const users = require('./users.js');
-
-// const about = {
-//   status: "Success",
-//   message: "Response Success",
-//   description: "Exercise #2",
-//   date: new Date(),
-//   data: member
-// };
-
-// const server = http.createServer((req, res) => {
-//     const path = req.url;
-
-//     if (path === '/') {
-//         res.statusCode = 200;
-//         res.setHeader('Content-Type', 'text/plain');
-//         res.write("This is the home page");
-//         res.end();
-//     } else if (path === '/about') {
-//         res.statusCode = 200;
-//         res.setHeader('Content-Type', 'application/json');
-//         res.write(JSON.stringify(about));
-//         res.end();
-//     } else if (path === '/users') {
-//         res.statusCode = 200;
-//         res.setHeader('Content-Type', 'application/json');
-//         res.write(JSON.stringify(users));
-//         res.end();
-//     } else {
-//         res.statusCode = 404;
-//         res.setHeader('Content-Type', 'text/plain');
-//         res.write('404 Not Found bro hehehe salam dari Andreas');
-//         res.end();
-//     } 
-
-// });
-
-// server.listen(port, () => {
-//     console.log(`Server running at http://localhost:${port}/ program by Andreas Topuh `);
-// });
+const port = 3000;
+app.listen(port, () => {
+    console.log(`Server berjalan di port ${port} bos`);
+});
