@@ -8,12 +8,12 @@ app.use(express.static("public"));
 app.use(express.json());
 
 
-//GET THE DATABASE 
+//-----------GET ALL = students/teachers-----------
 app.get("/students", async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM students");
     res.status(200).json({
-      status: "success",
+      status: "success get the database",
       data: result.rows,
     });
   } catch (err) {
@@ -21,9 +21,23 @@ app.get("/students", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+//TAMPILKAN ISI DATABASE DARI STUDENTS
+app.get("/teachers", async (req, res) => {
+  try {
+    const result = await db.query("SELECT * FROM teachers");
+    res.status(200).json({
+      status: "success get the database",
+      data: result.rows,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+//-----------GET ALL = students/teachers-----------
 
+//-----------GET WITH ID = students/teachers-----------
 
-//AMBIL DATA BERDASARKAN ID
 app.get("/students/:id", (req, res) => {
   const studentId = req.params.id;
   db.query(`SELECT * FROM students WHERE id = ${studentId}`, (err, result) => {
@@ -45,29 +59,78 @@ app.get("/students/:id", (req, res) => {
     }
   });
 });
-//TAMBAH
+//AMBIL DATA STUDENTS BERDASARKAN ID
+app.get("/teachers/:id", (req, res) => {
+  const teachersId = req.params.id;
+  db.query(`SELECT * FROM teachers WHERE id = ${teachersId}`, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Internal Server Error");
+    } else {
+      if (result.rows.length === 0) {
+        res.status(404).json({
+          status: "error",
+          message: "Data dosen tidak ditemukan",
+        });
+      } else {
+        res.status(200).json({
+          status: "success",
+          data: result.rows[0],
+        });
+      }
+    }
+  });
+});
+//-----------GET WITH ID = students/teachers-----------
+
+
+
+//-----------POST DATA = students/teachers-----------
 app.post("/students", async (req, res) => {
   const { name, address } = req.body;
+
   try {
     const result = await db.query(
-      `INSERT into students (name, address) values ('${name}', '${address}')`
+      `INSERT INTO students (name, address) VALUES ('Jacky', 'Manado')`
     );
+
     res.status(200).json({
       status: "success",
-      message: "data berhasil dimasukan",
+      message: "Data berhasil dimasukkan",
     });
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal Server Error");
   }
 });
-//PERBARUI
+app.post("/teachers", async (req, res) => {
+  const { name, address } = req.body;
+
+  try {
+    const result = await db.query(
+      `INSERT INTO teachers (name, address) VALUES ('Andreas', 'Agape')`
+    );
+
+    res.status(200).json({
+      status: "success",
+      message: "Data berhasil dimasukkan",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+//-----------POST DATA = students/teachers-----------
+
+
+
+//-----------PUT DATA = students/teachers-----------
 app.put("/students/:id", (req, res) => {
   const studentId = req.params.id;
   const { name, address } = req.body;
 
   db.query(
-    `UPDATE students SET name = '${name}', address = '${address}' WHERE id = ${studentId}`,
+    `UPDATE students SET name = 'Andreas', address = 'Bitung' WHERE id = ${studentId}`,
     (err, result) => {
       if (err) {
         console.error(err);
@@ -81,7 +144,9 @@ app.put("/students/:id", (req, res) => {
     }
   );
 });
-//HAPUS
+//-----------PUT DATA = students/teachers-----------
+
+//-----------DELETE DATA = students/teachers-----------
 app.delete("/students/:id", (req, res) => {
   const studentId = req.params.id;
   db.query(`DELETE FROM students WHERE id = ${studentId}`, (err, result) => {
@@ -96,6 +161,9 @@ app.delete("/students/:id", (req, res) => {
     }
   });
 });
+//-----------DELETE DATA = students/teachers-----------
+
+
 app.listen(port, () =>
   console.log(`Server running at http://localhost:${port}`)
 );
