@@ -1,46 +1,97 @@
-const http = require('http');
-const port = 3000;
+const express = require("express");
+const db = require("./db");
+const app = express();
+const port = 3200;
+const { Pool } = require("pg");
 
-const member = require('./member.js');
-const users = require('./users.js');
+app.use(express.static("public"));
+app.use(express.json());
 
-const about = {
-    status: "Success",
-    message: "Response Success",
-    description: "Tugas #2",
-    date: new Date(),
-    data: member
-};
-
-const server = http.createServer((req, res) => {
-    const path = req.url;
-
-    try {
-        if (path === '/') {
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'text/plain');
-            res.write("This is the home page");
-            res.end();
-        } else if (path === '/about') {
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
-            res.write(JSON.stringify(about));
-            res.end();
-        } else if (path === '/users') {
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
-            res.write(JSON.stringify(users));
-            res.end();
-        }
-    } catch (error) {
-        // Handle the error by sending a 404 response
-        res.statusCode = 404;
-        res.setHeader('Content-Type', 'text/plain');
-        res.write('404 Not Found bro hehehe salam dari Andreas');
-        res.end();
+app.get("/students", async (req, res) => {
+  try {
+    const result = await db.query("SELECT * FROM students");
+    res.status(200).json({
+      status: "sucess",
+      data: result.rows,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+//AMBIL DATA BERDASARKAN ID
+app.get("/students/:id", (req, res) => {
+  const studentId = req.params.id;
+  db.query(`SELECT * FROM students WHERE id = ${studentId}`, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Internal Server Error");
+    } else {
+      if (result.rows.length === 0) {
+        res.status(404).json({
+          status: "error",
+          message: "Data mahasiswa tidak ditemukan",
+        });
+      } else {
+        res.status(200).json({
+          status: "success",
+          data: result.rows[0],
+        });
+      }
     }
+  });
 });
+//TAMBAH
+app.post("/students", async (req, res) => {
+  const { name, address } = req.body;
+  try {
+    const result = await db.query(
+      `INSERT into students (name, address) values ('${name}', '${address}')`
+    );
+    res.status(200).json({
+      status: "success",
+      message: "data berhasil dimasukan",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+//PERBARUI
+app.put("/students/:id", (req, res) => {
+  const studentId = req.params.id;
+  const { name, address } = req.body;
 
-server.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}/ program by Andreas Topuh `);
+  db.query(
+    `UPDATE students SET name = '${name}', address = '${address}' WHERE id = ${studentId}`,
+    (err, result) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send("Internal Server Error");
+      } else {
+        res.status(200).json({
+          status: "success",
+          message: "Data berhasil diperbarui",
+        });
+      }
+    }
+  );
 });
+//HAPUS
+app.delete("/students/:id", (req, res) => {
+  const studentId = req.params.id;
+  db.query(`DELETE FROM students WHERE id = ${studentId}`, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Internal Server Error");
+    } else {
+      res.status(200).json({
+        status: "success",
+        message: "Data berhasil dihapus",
+      });
+    }
+  });
+});
+app.listen(port, () =>
+  console.log(`Server running at http://localhost:${port}`)
+);
