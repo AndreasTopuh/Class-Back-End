@@ -7,11 +7,13 @@ const { Pool } = require("pg");
 app.use(express.static("public"));
 app.use(express.json());
 
+
+//GET THE DATABASE 
 app.get("/students", async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM students");
     res.status(200).json({
-      status: "sucess",
+      status: "success",
       data: result.rows,
     });
   } catch (err) {
@@ -19,6 +21,8 @@ app.get("/students", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
+
 //AMBIL DATA BERDASARKAN ID
 app.get("/students/:id", (req, res) => {
   const studentId = req.params.id;
