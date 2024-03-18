@@ -6,7 +6,7 @@ const { Pool } = require("pg");
 
 app.use(express.static("public"));
 app.use(express.json());
-
+app.use(express.urlencoded({ extended: true }));
 
 //-----------GET ALL = students/teachers-----------
 app.get("/students", async (req, res) => {
