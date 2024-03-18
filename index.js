@@ -91,7 +91,7 @@ app.post("/students", async (req, res) => {
 
   try {
     const result = await db.query(
-      `INSERT INTO students (name, address) VALUES ('Jacky', 'Manado')`
+      `INSERT INTO students (name, address) VALUES ('${name}', '${address}')`
     );
 
     res.status(200).json({
@@ -108,7 +108,7 @@ app.post("/teachers", async (req, res) => {
 
   try {
     const result = await db.query(
-      `INSERT INTO teachers (name, address) VALUES ('Andreas', 'Agape')`
+   `INSERT INTO students (name, address) VALUES ('${name}', '${address}')`
     );
 
     res.status(200).json({
