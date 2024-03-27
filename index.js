@@ -1,93 +1,157 @@
-////////////////KONDISI DISIMPAN DALAM TRY & CATCH//////////////
+const express = require("express");
+const db = require("./db");
+const app = express();
+const port = 3200;
+const { Pool } = require("pg");
 
-const http = require('http');
-const port = 3000;
+const { PrismaClient } = require("@prisma/client")
+const prisma = new PrismaClient()
 
-const member = require('./member.js');
-const users = require('./users.js');
+app.use(express.static("public"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-const about = {
-  status: "Success",
-  message: "Response Success",
-  description: "Exercise #2",
-  date: new Date(),
-  data: member
-};
 
-const server = http.createServer((req, res) => {
-    const path = req.url;
+//-------------------------GET DATA DARI TABEL STUDENTS-------------------------
+app.get("/students", async (req, res) => {
+  try {
 
-    if (path === '/') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/plain');
-        res.write("<h1>This is the home page</h1>");
-        res.end();
-    } else if (path === '/about') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.write(JSON.stringify(about));
-        res.end();
-    } else if (path === '/users') {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.write(JSON.stringify(users));
-        res.end();
+    const allStudents = await prisma.students.findMany();
+
+    res.status(200).json({
+      status: "success get the database",
+      data: allStudents,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+//-------------------------GET DATA DARI TABEL STUDENTS-------------------------
+
+//-------------------------POST DATA KE TABEL STUDENTS----------------------------
+app.post("/students", async (req, res) => {
+  try {
+    const { name, address } = req.body;
+
+    await prisma.students.create({
+      data: {
+        name: name,
+        address: address,
+      },
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Data berhasil dimasukkan",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+//-------------------------POST DATA KE TABEL STUDENTS----------------------------
+//-------------------------POST DATA KE TABEL OFFICERS----------------------------
+app.post("/officers", async (req, res) => {
+  try {
+    const { name, address } = req.body;
+
+    await prisma.officers.create({
+      data: {
+        name: name,
+        address: address,
+      },
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Data berhasil dimasukkan",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+//-------------------------POST DATA KE TABEL OFFICERS----------------------------
+
+//-------------------------GET DENGAN ID DATA DARI TABEL STUDENTS-----------------
+app.get("/students/:id", async (req, res) => {
+  const studentId = req.params.id;
+
+  try {
+    const student = await prisma.students.findUnique({
+      where: {
+        id: parseInt(studentId),
+      },
+    });
+
+    if (!student) {
+      res.status(404).json({
+        status: "error",
+        message: "Data mahasiswa tidak ditemukan",
+      });
     } else {
-        res.statusCode = 404;
-        res.setHeader('Content-Type', 'text/plain');
-        res.write('404 Not Found bro hehehe salam dari Andreas');
-        res.end();
+      res.status(200).json({
+        status: "success",
+        data: student,
+      });
     }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
 });
+//-------------------------GET DENGAN ID DATA DARI TABEL STUDENTS-----------------
 
-server.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}/ program by Andreas Topuh `);
+//-------------------------UPDATE DENGAN ID DATA KE TABEL STUDENTS----------------
+app.put("/students/:id", async (req, res) => {
+  const studentId = req.params.id;
+  const { name, address } = req.body;
+
+  try {
+    await prisma.students.update({
+      where: {
+        id: parseInt(studentId),
+      },
+      data: {
+        name: name,
+        address: address,
+      },
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Data berhasil diperbarui",
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
 });
+//-------------------------UPDATE DENGAN ID DATA KE TABEL STUDENTS----------------
+
+//-------------------------DELETE DENGAN ID DATA DARI TABEL STUDENTS--------------
+app.delete("/students/:id", async (req, res) => {
+  const studentId = req.params.id;
+  try {
+    await prisma.students.deleteMany({
+      where: {
+        id: parseInt(studentId),
+      },
+    });
+
+     res.status(200).json({
+      status: "success",
+      message: "Data berhasil dihapus",
+    });
+  } catch (error) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+//-------------------------DELETE DENGAN ID DATA DARI TABEL STUDENTS--------------
 
 
-//////////////USING IF BIASA////////////////////////////
-
-// const http = require('http');
-// const port = 3000;
-
-// const member = require('./member.js');
-// const users = require('./users.js');
-
-// const about = {
-//   status: "Success",
-//   message: "Response Success",
-//   description: "Exercise #2",
-//   date: new Date(),
-//   data: member
-// };
-
-// const server = http.createServer((req, res) => {
-//     const path = req.url;
-
-//     if (path === '/') {
-//         res.statusCode = 200;
-//         res.setHeader('Content-Type', 'text/plain');
-//         res.write("This is the home page");
-//         res.end();
-//     } else if (path === '/about') {
-//         res.statusCode = 200;
-//         res.setHeader('Content-Type', 'application/json');
-//         res.write(JSON.stringify(about));
-//         res.end();
-//     } else if (path === '/users') {
-//         res.statusCode = 200;
-//         res.setHeader('Content-Type', 'application/json');
-//         res.write(JSON.stringify(users));
-//         res.end();
-//     } else {
-//         res.statusCode = 404;
-//         res.setHeader('Content-Type', 'text/plain');
-//         res.write('404 Not Found bro hehehe salam dari Andreas');
-//         res.end();
-//     } 
-
-// });
-
-// server.listen(port, () => {
-//     console.log(`Server running at http://localhost:${port}/ program by Andreas Topuh `);
-// });
+app.listen(port, () =>
+  console.log(`Server running at http://localhost:${port}`)
+);
